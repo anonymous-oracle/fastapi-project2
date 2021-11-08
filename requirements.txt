@@ -6,7 +6,6 @@ certifi
 click
 colorama
 distlib
-fastapi
 fastapi[all]
 uvicorn[standard]
 FastAPI-SQLAlchemy
