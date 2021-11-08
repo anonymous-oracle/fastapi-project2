@@ -4,6 +4,11 @@ from schemas import Post
 
 app = FastAPI()
 
+my_posts = [
+    {"title": "title of post 1", "content": "content of post 1", "id": 1},
+    {"title": "title of post 2", "content": "content of post 2", "id": 2},
+]
+
 
 @app.get("/")
 async def root():
@@ -22,7 +27,7 @@ async def get_posts():
 #     return {"message": "created post", "body": payload}
 
 
-@app.post("/createposts")
+@app.post("/posts")
 async def create_post(post: Post):
     print(post.dict())
     return {"message": "created post", "body": post}
