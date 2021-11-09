@@ -1,12 +1,13 @@
 from fastapi import FastAPI, Depends
-from fastapi.openapi.models import Response
+from fastapi import Response
 from sqlalchemy.orm.session import Session
 from starlette import status
 from schemas import Post
+from fastapi import HTTPException
 from .database import engine_, get_db, Session
-from .models import Base
+from . import models
 
-Base.metadata.create_all(bind=engine_)
+models.Base.metadata.create_all(bind=engine_)
 
 app = FastAPI()
 
@@ -22,53 +23,63 @@ my_posts = [
 ]
 
 
-    
-
 @app.get("/")
 async def root():
     return {"message": "hello world"}
 
-@app.get('/sqlalchemy')
-def test_posts(db:Session = Depends(get_db)):
-    
-    return {'status':'success'}
+
+# @app.get("/sqlalchemy")
+# def test_posts(db: Session = Depends(get_db)):
+#     posts = db.query(models.Post).all()
+#     return {"status": "success", "posts": posts}
+
 
 @app.get("/posts")
-async def get_posts():
-    cursor.execute(GET_POSTS)
-    posts = cursor.fetchall()
-    print(posts)
-    return {"posts": posts}
+async def get_posts(db: Session = Depends(get_db)):
+    return {"posts": db.query(models.Post).all()}
 
 
 @app.post("/posts")
-async def create_post(post: Post):
-    cursor.execute(
-        CREATE_POST, (post.title, post.content)
-    )  # this is a good method to follow because this formatting is not vulnerable to sql injection attacks
-    new_post = cursor.fetchone()
-    # commit the changes
-    conn.commit()
-    return {"message": "created post", "body": new_post}
+async def create_post(post: Post, db: Session = Depends(get_db)):
+    new_post = models.Post(**post.dict())
+    db.add(new_post)
+    db.commit()
+    db.refresh(new_post)
+    return {"message": "created post", "data": new_post}
 
 
 @app.post("/posts/{id}")
-async def get_post_id(id: int):  # should be an int for the sake of validation
-    cursor.execute(GET_POST_BY_ID, (str(id)))
-    post = cursor.fetchone()
+async def get_post_id(
+    id: int, db: Session = Depends(get_db)
+):  # should be an int for the sake of validation
+    post = db.query(models.Post).filter(models.Post.id == id).first()
     return {"data": post}
 
 
 @app.delete("/posts/{id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_post_id(id: int, response: Response):  # should be an int for the sake of validation
-    cursor.execute(DELETE_POST_BY_ID, (str(id)))
-    post = cursor.fetchone()
-    conn.commit()
-    return response
+async def delete_post_id(
+    id: int, db: Session = Depends(get_db)
+):  # should be an int for the sake of validation
+    post = db.query(models.Post).filter(models.Post.id == id)
+    if not post.first():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"post with id {id} does not exist",
+        )
+    # use this for efficient db operation
+    post.delete(synchronize_session=False)
+    db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
 
 @app.put("/posts/{id}")
-async def update_post_id(id: int, post: Post):
-    cursor.execute(UPDATE_POST_BY_ID, (post.title, post.content, str(id)))
-    post = cursor.fetchone()
-    conn.commit()
-    return {"updated": post}
+async def update_post_id(id: int, post: Post, db: Session = Depends(get_db)):
+    db_post = db.query(models.Post).filter(models.Post.id == id)
+    if not db_post.first():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"post with id {id} does not exist",
+        )
+    db_post.update(post.dict(), synchronize_session=False)
+    db.commit()
+    return {"detail": "update successful"}
