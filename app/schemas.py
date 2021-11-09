@@ -1,4 +1,4 @@
-from typing import Optional
+from datetime import datetime
 from pydantic import BaseModel
 
 
@@ -16,3 +16,19 @@ class Post(BasePost):
 class PostResponse(BasePost):
     title: str
     content: str
+
+
+class BaseUser(BaseModel):
+    class Config:
+        orm_mode = True
+
+
+class User(BaseUser):
+    email: str
+    password: str
+
+
+class UserResponse(BaseUser):
+    id: int
+    email: str
+    created_at: datetime

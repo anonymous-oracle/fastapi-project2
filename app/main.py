@@ -3,6 +3,8 @@ from fastapi import Response
 from sqlalchemy.orm.session import Session
 from starlette import status
 from fastapi import HTTPException
+
+from app.hashing import gen_salt, hash_pwd
 from .database import engine_, get_db, Session
 from . import models, schemas
 
@@ -65,3 +67,16 @@ async def update_post_id(id: int, post: schemas.Post, db: Session = Depends(get_
     db_post.update(post.dict(), synchronize_session=False)
     db.commit()
     return {"detail": "update successful"}
+
+
+@app.post(
+    "/users", status_code=status.HTTP_201_CREATED, response_model=schemas.UserResponse
+)
+async def create_user(user: schemas.User, db: Session = Depends(get_db)):
+    salt = gen_salt()
+    user.password = hash_pwd(user.password, salt)
+    new_user = models.User(**user.dict(), salt=salt)
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return new_user
