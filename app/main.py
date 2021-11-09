@@ -1,10 +1,12 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.openapi.models import Response
+from sqlalchemy.orm.session import Session
 from starlette import status
 from schemas import Post
-import psycopg2
-from psycopg2.extras import RealDictCursor
-import time
+from .database import engine_, get_db, Session
+from .models import Base
+
+Base.metadata.create_all(bind=engine_)
 
 app = FastAPI()
 
@@ -18,28 +20,18 @@ my_posts = [
     {"title": "title of post 1", "content": "content of post 1", "id": 1},
     {"title": "title of post 2", "content": "content of post 2", "id": 2},
 ]
-while True:
-    try:
-        conn = psycopg2.connect(
-            host="localhost",
-            database="fastapi",
-            user="postgres",
-            password="1234",
-            cursor_factory=RealDictCursor,
-        )
-        cursor = conn.cursor()
-        print("Database connection successful")
-        break
-    except Exception as error:
-        print("Connecting to database failed")
-        print("Error: ", error)
-        time.sleep(2)
 
+
+    
 
 @app.get("/")
 async def root():
     return {"message": "hello world"}
 
+@app.get('/sqlalchemy')
+def test_posts(db:Session = Depends(get_db)):
+    
+    return {'status':'success'}
 
 @app.get("/posts")
 async def get_posts():
