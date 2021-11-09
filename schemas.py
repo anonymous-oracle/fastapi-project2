@@ -10,4 +10,4 @@ class Post(BasePost):
     title: str
     content: str
     published: bool = True
-    rating: Optional[int] = None
+    # rating: Optional[int] = None
