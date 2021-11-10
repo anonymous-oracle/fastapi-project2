@@ -32,3 +32,8 @@ class UserResponse(BaseUser):
     id: int
     email: str
     created_at: datetime
+
+
+class UserLogin(BaseUser):
+    email: str
+    password: str
