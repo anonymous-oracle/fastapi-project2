@@ -41,14 +41,22 @@ async def delete_post_id(
     db: Session = Depends(get_db),
     current_user: schemas.TokenData = Depends(get_current_user),
 ):  # should be an int for the sake of validation
-    post = db.query(models.Post).filter(models.Post.id == id)
-    if not post.first():
+    post_query = db.query(models.Post).filter(models.Post.id == id)
+    post = post_query.first()
+    if not post:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"post with id {id} does not exist",
         )
+    # checks to delete only the post of the current user
+    if post.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to perform requested action",
+        )
+
     # use this for efficient db operation
-    post.delete(synchronize_session=False)
+    post_query.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
@@ -60,12 +68,19 @@ async def update_post_id(
     db: Session = Depends(get_db),
     current_user: schemas.TokenData = Depends(get_current_user),
 ):
-    db_post = db.query(models.Post).filter(models.Post.id == id)
-    if not db_post.first():
+    post_query = db.query(models.Post).filter(models.Post.id == id)
+    db_post = post_query.first()
+    if not db_post:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"post with id {id} does not exist",
         )
-    db_post.update(post.dict(), synchronize_session=False)
+    # checks to update only the posts of the current user
+    if db_post.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to perform requested action",
+        )
+    post_query.update(post.dict(), synchronize_session=False)
     db.commit()
     return {"detail": "update successful"}
