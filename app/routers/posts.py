@@ -1,3 +1,4 @@
+from ..oauth2 import get_current_user
 from .. import schemas, models
 from fastapi import status, APIRouter
 from ..database import Session, get_db

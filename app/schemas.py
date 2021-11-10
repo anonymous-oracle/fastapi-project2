@@ -1,4 +1,6 @@
 from datetime import datetime
+from os import access
+from typing import Optional
 from pydantic import BaseModel
 
 
@@ -37,3 +39,12 @@ class UserResponse(BaseUser):
 class UserLogin(BaseUser):
     email: str
     password: str
+
+# access token schemas
+class Token(BaseModel):
+    access_token:str
+    token_type:str
+
+class TokenData(BaseModel):
+    id: Optional[int] = None
+    email: Optional[str] = None
