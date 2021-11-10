@@ -2,6 +2,9 @@ from fastapi import Depends, status
 from fastapi.exceptions import HTTPException
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
+
+from app import models
+from .database import Session, get_db
 from . import schemas
 from app.config import ACCESS_TOKEN_EXPIRE_MINUTES, SECRET_KEY
 from fastapi.security.oauth2 import OAuth2PasswordBearer
@@ -37,11 +40,15 @@ def verify_access_token(token: str, credentials_exception):
 
 
 # to get current user
-def get_current_user(token: str = Depends(oauth2_scheme)):
+def get_current_user(
+    token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
+):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail=f"Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-
-    return verify_access_token(token=token, credentials_exception=credentials_exception)
+    token = verify_access_token(
+        token=token, credentials_exception=credentials_exception
+    )
+    return db.query(models.User).filter(models.User.id == token.id).first()

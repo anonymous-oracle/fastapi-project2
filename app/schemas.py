@@ -40,10 +40,12 @@ class UserLogin(BaseUser):
     email: str
     password: str
 
+
 # access token schemas
 class Token(BaseModel):
-    access_token:str
-    token_type:str
+    access_token: str
+    token_type: str
+
 
 class TokenData(BaseModel):
     id: Optional[int] = None

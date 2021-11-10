@@ -10,7 +10,7 @@ router = APIRouter(tags=["Authentication"])
 # authentication related routes in auth.py
 
 
-@router.post("/login")
+@router.post("/login", response_model=schemas.Token)
 # OAuth2PasswordRequestForm is required to receive the credentials in a form data
 async def login(
     user_credentials: OAuth2PasswordRequestForm = Depends(),

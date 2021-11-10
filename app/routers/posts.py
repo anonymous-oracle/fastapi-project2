@@ -13,7 +13,11 @@ async def get_posts(db: Session = Depends(get_db)):
 
 
 @router.post("/", response_model=schemas.PostResponse)
-async def create_post(post: schemas.Post, db: Session = Depends(get_db)):
+async def create_post(
+    post: schemas.Post,
+    db: Session = Depends(get_db),
+    current_user: schemas.TokenData = Depends(get_current_user),
+):
     new_post = models.Post(**post.dict())
     db.add(new_post)
     db.commit()
@@ -23,7 +27,9 @@ async def create_post(post: schemas.Post, db: Session = Depends(get_db)):
 
 @router.post("/{id}", response_model=schemas.PostResponse)
 async def get_post_id(
-    id: int, db: Session = Depends(get_db)
+    id: int,
+    db: Session = Depends(get_db),
+    current_user: schemas.TokenData = Depends(get_current_user),
 ):  # should be an int for the sake of validation
     post = db.query(models.Post).filter(models.Post.id == id).first()
     return post
@@ -31,7 +37,9 @@ async def get_post_id(
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_post_id(
-    id: int, db: Session = Depends(get_db)
+    id: int,
+    db: Session = Depends(get_db),
+    current_user: schemas.TokenData = Depends(get_current_user),
 ):  # should be an int for the sake of validation
     post = db.query(models.Post).filter(models.Post.id == id)
     if not post.first():
@@ -46,7 +54,12 @@ async def delete_post_id(
 
 
 @router.put("/{id}")
-async def update_post_id(id: int, post: schemas.Post, db: Session = Depends(get_db)):
+async def update_post_id(
+    id: int,
+    post: schemas.Post,
+    db: Session = Depends(get_db),
+    current_user: schemas.TokenData = Depends(get_current_user),
+):
     db_post = db.query(models.Post).filter(models.Post.id == id)
     if not db_post.first():
         raise HTTPException(
