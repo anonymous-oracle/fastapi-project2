@@ -1,5 +1,4 @@
 from datetime import datetime
-from os import access
 from typing import Optional
 from pydantic import BaseModel
 
@@ -13,13 +12,6 @@ class Post(BasePost):
     title: str
     content: str
     published: bool = True
-
-
-class PostResponse(BasePost):
-    title: str
-    content: str
-    user_id: int
-    created_at: datetime
 
 
 class BaseUser(BaseModel):
@@ -41,6 +33,14 @@ class UserResponse(BaseUser):
 class UserLogin(BaseUser):
     email: str
     password: str
+
+
+class PostResponse(BasePost):
+    title: str
+    content: str
+    user_id: int
+    created_at: datetime
+    user: UserResponse
 
 
 # access token schemas

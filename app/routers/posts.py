@@ -1,3 +1,4 @@
+from typing import Optional
 from ..oauth2 import get_current_user
 from .. import schemas, models
 from fastapi import status, APIRouter
@@ -8,8 +9,21 @@ router = APIRouter(prefix="/posts", tags=["Posts"])
 
 
 @router.get("/")
-async def get_posts(db: Session = Depends(get_db)):
-    return {"posts": db.query(models.Post).all()}
+async def get_posts(
+    db: Session = Depends(get_db),
+    limit: int = 5,
+    skip: int = 0,
+    search: Optional[str] = "",
+):
+    # limit is a url/query parameter which returns only the limit number of posts and skip is used to skip a certain number of posts from the start
+    # the search query is passed to use basic search functionality
+    return {
+        "posts": db.query(models.Post)
+        .filter(models.Post.title.contains(search))
+        .limit(limit)
+        .offset(skip)
+        .all()
+    }
 
 
 @router.post("/", response_model=schemas.PostResponse)

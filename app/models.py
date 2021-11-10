@@ -20,7 +20,7 @@ class Post(Base):
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
 
-    # user = relationship("User", back_populates="posts")
+    user = relationship("User")
 
 
 class User(Base):
