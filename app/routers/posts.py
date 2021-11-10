@@ -18,7 +18,7 @@ async def create_post(
     db: Session = Depends(get_db),
     current_user: schemas.TokenData = Depends(get_current_user),
 ):
-    new_post = models.Post(**post.dict())
+    new_post = models.Post(**post.dict(), user_id=current_user.id)
     db.add(new_post)
     db.commit()
     db.refresh(new_post)

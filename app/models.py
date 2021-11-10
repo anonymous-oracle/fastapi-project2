@@ -1,7 +1,8 @@
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql.expression import text
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from .database import Base
-from sqlalchemy import Integer, String, Column, Boolean
+from sqlalchemy import Integer, String, Column, Boolean, ForeignKey
 
 
 class Post(Base):
@@ -15,6 +16,11 @@ class Post(Base):
     created_at = Column(
         TIMESTAMP(timezone=True), server_default=text("NOW()"), nullable=False
     )
+    user_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+
+    # user = relationship("User", back_populates="posts")
 
 
 class User(Base):
@@ -27,3 +33,5 @@ class User(Base):
     created_at = Column(
         TIMESTAMP(timezone=True), server_default=text("NOW()"), nullable=False
     )
+
+    # posts = relationship("Post", back_populates="user", cascade="delete")

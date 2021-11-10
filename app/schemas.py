@@ -18,6 +18,8 @@ class Post(BasePost):
 class PostResponse(BasePost):
     title: str
     content: str
+    user_id: int
+    created_at: datetime
 
 
 class BaseUser(BaseModel):
