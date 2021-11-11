@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, status, HTTPException
+from sqlalchemy import func
 
 from app.oauth2 import get_current_user
 from .. import schemas, models
@@ -15,6 +16,12 @@ async def vote(
     db: Session = Depends(get_db),
     current_user: schemas.TokenData = Depends(get_current_user),
 ):
+    post = db.query(models.Post).filter(models.Post.id == vote.post_id).first()
+    if not post:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"post {vote.post_id} not found",
+        )
     vote_query = db.query(models.Vote).filter(
         models.Vote.post_id == vote.post_id, models.Vote.user_id == current_user.id
     )
@@ -42,14 +49,12 @@ async def vote(
 
 @router.get("/{post_id}")
 async def get_votes(post_id: int, db: Session = Depends(get_db)):
-    votes_query = db.query(models.Vote).filter(models.Vote.post_id == post_id)
-    post_query = db.query(models.Post).filter(models.Post.id == post_id)
-    votes = votes_query.all()
-    post = post_query.first()
-    if not post:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"post {post_id} does not exist",
-        )
-    
-    return {"post": post, "votes": len(votes)}
+    join_query = (
+        db.query(models.Post, func.count(models.Vote.post_id).label("votes"))
+        .join(models.Vote, models.Vote.post_id == models.Post.id, isouter=True)
+        .group_by(models.Post.id)
+    )
+
+    return {
+        "votes": join_query.filter(models.Post.id == post_id).first(),
+    }
