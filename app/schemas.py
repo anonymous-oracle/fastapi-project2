@@ -52,3 +52,10 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     id: Optional[int] = None
     email: Optional[str] = None
+
+
+# Vote schema
+class Vote(BaseModel):
+    post_id: int
+    # if dir is 1 then it is a vote/like; if it is 0 it is a down-vote/unlike
+    dir: int
