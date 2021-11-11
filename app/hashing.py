@@ -1,10 +1,10 @@
 import hashlib
 from uuid import uuid4
-from .config import SECRET_KEY
+from .config import settings
 
 
 def gen_salt():
-    return hashlib.sha3_512(uuid4().bytes + SECRET_KEY.encode()).hexdigest()
+    return hashlib.sha3_512(uuid4().bytes + settings.secret_key.encode()).hexdigest()
 
 
 def hash_pwd(password: str, salt: str):

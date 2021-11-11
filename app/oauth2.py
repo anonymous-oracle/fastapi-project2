@@ -8,7 +8,7 @@ from .database import Session, get_db
 from . import schemas
 from app.config import ACCESS_TOKEN_EXPIRE_MINUTES, SECRET_KEY
 from fastapi.security.oauth2 import OAuth2PasswordBearer
-
+from .config import settings
 # token related functions in oauth2.py
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
@@ -16,18 +16,18 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 def create_access_token(data: dict):
     to_encode = data.copy()
-    expiry = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    expiry = datetime.utcnow() + timedelta(minutes=settings.access_token_expire_minutes)
     # the 'exp' key is a jwt standard to set expiry time
     to_encode.update({"exp": expiry})
 
-    encoded_jwt = jwt.encode(claims=to_encode, key=SECRET_KEY, algorithm="HS512")
+    encoded_jwt = jwt.encode(claims=to_encode, key=settings.secret_key, algorithm=settings.algorithm)
     return encoded_jwt
 
 
 def verify_access_token(token: str, credentials_exception):
     try:
         decoded_jwt = jwt.decode(
-            token=token, key=SECRET_KEY, algorithms=["HS256", "HS512"]
+            token=token, key=settings.secret_key, algorithms=[settings.algorithm]
         )
         if decoded_jwt.get("id") == None and decoded_jwt.get("email") == None:
             raise credentials_exception
