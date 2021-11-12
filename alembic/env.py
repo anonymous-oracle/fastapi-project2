@@ -6,8 +6,8 @@ from sqlalchemy import pool
 from alembic import context
 
 # ALEMBIC NEEDS TO WORK WITH THE BASE TO ACCESS THE METADATA OF THE MODELS
-from ..app.models import Base
-from ..app.config import settings
+from app.models import Base
+from app.config import settings
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
