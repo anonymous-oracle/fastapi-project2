@@ -18,3 +18,7 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+# if __name__=='__main__':
+#     import secrets
+#     print(secrets.token_urlsafe(512))
