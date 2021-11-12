@@ -14,7 +14,6 @@
 .idea/**/shelf
 
 env-batch
-*config*
 
 # Generated files
 .idea/**/contentModel.xml
@@ -209,10 +208,9 @@ modules.xml
 
 # End of https://www.gitignore.io/api/intellij,pycharm+all,jetbrains+all
 env/
-.env
+*.env*
 *.cred
 *cfg
-config
 pretrained_models/EncoderClassifier-3323780377799293683/*
 pretrained_models/EncoderClassifier-3987667329270844230/*
 verification_audios/*
@@ -221,3 +219,4 @@ workspace.code-workspace
 *.wav
 *.yaml
 *.ckpt
+*__pycache__*
