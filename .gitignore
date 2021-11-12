@@ -219,3 +219,4 @@ workspace.code-workspace
 *.wav
 *.yaml
 *.ckpt
+*__pycache__*
